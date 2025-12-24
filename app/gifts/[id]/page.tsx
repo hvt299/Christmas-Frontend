@@ -7,7 +7,7 @@ import { Gift, Music, User, Snowflake } from 'lucide-react'
 import { useMusicStore } from '@/store/useMusicStore'
 import Link from 'next/link'
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
 
 // 1. BẢNG MÀU THEO THEME HỘP QUÀ 🎨
 const themeMap: Record<string, { headerBg: string, headerText: string, accent: string, giftStyle: string, glowColor: string }> = {
