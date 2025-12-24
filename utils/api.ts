@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/client';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"; // Địa chỉ Backend mới
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"; // Địa chỉ Backend mới
 
 export const apiCall = async (endpoint: string, method: 'GET' | 'POST' = 'GET', body?: any) => {
   const supabase = createClient();

@@ -98,7 +98,7 @@ export default function Home() {
 
         {/* Khu vực nút hành động (Call to Action) */}
         {user ? (
-          <div className="animate-fade-in-up">
+          <div className="animate-fade-in-up flex flex-col items-center gap-4">
             <Link
               href="/create"
               className="group relative inline-flex items-center gap-3 px-8 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold text-xl shadow-[0_0_20px_rgba(220,38,38,0.5)] transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(220,38,38,0.7)]"
@@ -109,6 +109,15 @@ export default function Home() {
               {/* Hiệu ứng hào quang khi hover */}
               <div className="absolute inset-0 rounded-2xl ring-4 ring-white/30 group-hover:ring-white/50 transition-all"></div>
             </Link>
+
+            {/* Xem danh sách quà */}
+            <Link
+              href="/my-gifts"
+              className="text-yellow-300 hover:text-yellow-100 font-bold underline decoration-dotted underline-offset-4 flex items-center gap-2 transition"
+            >
+              <Gift className="w-4 h-4" /> Xem lại các món quà đã gửi
+            </Link>
+
             <p className="mt-4 text-white/80 text-sm">Hãy trao đi yêu thương ngay hôm nay ✨</p>
           </div>
         ) : (
