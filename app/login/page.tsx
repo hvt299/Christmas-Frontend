@@ -41,15 +41,18 @@ export default function LoginPage() {
     setMessage(null)
 
     if (isSignUp) {
+      const origin = window.location.origin;
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: { full_name: fullName }
+          data: { full_name: fullName },
+          emailRedirectTo: `${origin}/auth/callback`
         }
       })
       if (error) setMessage(error.message)
-      else setMessage('Đăng ký thành công! Hãy đăng nhập ngay.')
+      else setMessage('Đăng ký thành công! Hãy kiểm tra email để xác nhận nhé.')
     } else {
       const { error } = await supabase.auth.signInWithPassword({
         email,
