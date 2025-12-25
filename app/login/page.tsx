@@ -59,7 +59,13 @@ export default function LoginPage() {
         password,
       })
       if (error) {
-        setMessage('Sai email hoặc mật khẩu rồi!')
+        if (error.message.includes('Email not confirmed')) {
+          setMessage('Bạn chưa xác nhận email! Hãy kiểm tra hộp thư (cả mục spam) nhé.')
+        } else if (error.message.includes('Invalid login credentials')) {
+          setMessage('Sai email hoặc mật khẩu rồi!')
+        } else {
+          setMessage(`Lỗi: ${error.message}`)
+        }
       } else {
         router.push('/')
         router.refresh()
@@ -81,16 +87,6 @@ export default function LoginPage() {
   // 3. GIAO DIỆN CHÍNH (Chỉ hiện khi chắc chắn chưa đăng nhập)
   return (
     <div className="min-h-screen flex items-center justify-center bg-red-900 relative overflow-hidden">
-
-      {/* NÚT BACK */}
-      <Link
-        href="/"
-        className="absolute top-6 left-6 z-20 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-white transition-all hover:scale-110"
-        title="Quay lại trang chủ"
-      >
-        <ArrowLeft className="w-6 h-6" />
-      </Link>
-
       {/* Hiệu ứng nền */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <Snowflake className="absolute top-10 left-10 w-12 h-12 text-white animate-spin-slow" />
@@ -98,7 +94,16 @@ export default function LoginPage() {
       </div>
 
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md z-10 border-4 border-yellow-400 relative animate-fade-in-up">
-        <div className="text-center mb-6">
+        {/* NÚT BACK */}
+        <Link
+          href="/"
+          className="absolute top-4 left-4 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
+          title="Quay lại trang chủ"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </Link>
+
+        <div className="text-center mb-6 mt-4">
           <Gift className="w-16 h-16 mx-auto text-red-600 mb-2" />
           <h2 className="text-3xl font-bold text-red-800">
             {isSignUp ? 'Đăng Ký Nhận Quà' : 'Đăng Nhập'}

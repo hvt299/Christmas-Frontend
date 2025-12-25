@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import { Gift, LogOut, User, Snowflake } from 'lucide-react' // Thêm icon LogOut, User, Snowflake
+import { Gift, LogOut, User, Snowflake, Clock } from 'lucide-react' // Thêm icon LogOut, User, Snowflake
 import ChristmasCountdown from '@/components/ChristmasCountdown'
 
 export default function Home() {
@@ -18,6 +18,9 @@ export default function Home() {
   }, [])
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Bạn"
+
+  const currentMonth = new Date().getMonth() + 1;
+  const isDecember = currentMonth === 12;
 
   // Hàm xử lý Logout
   const handleLogout = async () => {
@@ -92,23 +95,40 @@ export default function Home() {
         </h1>
 
         {/* Đồng hồ đếm ngược (Component của bạn) */}
-        <div className="mb-12 scale-110">
+        <div className="mb-6 scale-110">
           <ChristmasCountdown />
         </div>
 
         {/* Khu vực nút hành động (Call to Action) */}
         {user ? (
           <div className="animate-fade-in-up flex flex-col items-center gap-4">
-            <Link
-              href="/create"
-              className="group relative inline-flex items-center gap-3 px-8 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold text-xl shadow-[0_0_20px_rgba(220,38,38,0.5)] transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(220,38,38,0.7)]"
-            >
-              <Gift className="w-6 h-6 animate-bounce" />
-              <span>Gửi Món Quà Mới</span>
+            {isDecember ? (
+              <Link
+                href="/create"
+                className="group relative inline-flex items-center gap-3 px-8 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold text-xl shadow-[0_0_20px_rgba(220,38,38,0.5)] transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(220,38,38,0.7)]"
+              >
+                <Gift className="w-6 h-6 animate-bounce" />
+                <span>Gửi Món Quà Mới</span>
 
-              {/* Hiệu ứng hào quang khi hover */}
-              <div className="absolute inset-0 rounded-2xl ring-4 ring-white/30 group-hover:ring-white/50 transition-all"></div>
-            </Link>
+                {/* Hiệu ứng hào quang khi hover */}
+                <div className="absolute inset-0 rounded-2xl ring-4 ring-white/30 group-hover:ring-white/50 transition-all"></div>
+              </Link>
+            ) : (
+              <button
+                disabled
+                className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gray-400 text-white rounded-2xl font-bold text-xl cursor-not-allowed shadow-none grayscale opacity-70"
+              >
+                <Clock className="w-6 h-6" />
+                <span>Hẹn gặp lại tháng 12!</span>
+                <div className="absolute inset-0 rounded-2xl ring-4 ring-white/10"></div>
+              </button>
+            )}
+
+            {!isDecember && (
+              <p className="text-white mt-2 text-sm opacity-80 italic">
+                Cỗ xe tuần lộc đang nghỉ ngơi, hãy quay lại vào mùa Giáng sinh tới nhé!
+              </p>
+            )}
 
             {/* Xem danh sách quà */}
             <Link
