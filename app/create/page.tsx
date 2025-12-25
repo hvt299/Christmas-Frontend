@@ -91,6 +91,19 @@ export default function CreateGiftPage() {
     }
   }, [searchQuery])
 
+  useEffect(() => {
+    const checkSeason = () => {
+      const currentMonth = new Date().getMonth() + 1; // 1-12
+      // Nếu không phải tháng 12 -> Đá về trang chủ
+      if (currentMonth !== 12) {
+        alert("Ho ho ho! Cỗ xe tuần lộc chưa khởi hành. Hãy quay lại vào tháng 12 nhé! 🎅");
+        router.push('/');
+      }
+    };
+    
+    checkSeason();
+  }, [router]);
+
   // Hàm chọn user từ dropdown
   const selectUser = (user: any) => {
     setFormData({
