@@ -41,18 +41,38 @@ export default function LoginPage() {
     setMessage(null)
 
     if (isSignUp) {
-      const origin = window.location.origin;
+      try {
+        // 1. Gọi hàm RPC để kiểm tra email trong Database
+        const { data: emailExists, error: rpcError } = await supabase.rpc('check_email_exists', {
+          email_to_check: email
+        })
 
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: fullName },
-          emailRedirectTo: `${origin}/auth/callback`
+        if (rpcError) throw rpcError
+
+        // 2. Nếu email đã tồn tại -> Báo lỗi ngay và KHÔNG cho đăng ký tiếp
+        if (emailExists) {
+          setMessage('Email này đã được đăng ký rồi! Hãy thử Đăng nhập hoặc dùng Google nhé.')
+          setLoading(false)
+          return // Dừng lại tại đây
         }
-      })
-      if (error) setMessage(error.message)
-      else setMessage('Đăng ký thành công! Hãy kiểm tra email để xác nhận nhé.')
+
+        // 3. Nếu chưa tồn tại -> Mới cho phép chạy tiếp hàm Sign Up
+        const origin = window.location.origin;
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: fullName },
+            emailRedirectTo: `${origin}/auth/callback`
+          }
+        })
+
+        if (error) setMessage(error.message)
+        else setMessage('Đăng ký thành công! Hãy kiểm tra email để xác nhận nhé.')
+
+      } catch (err: any) {
+        setMessage('Lỗi hệ thống: ' + err.message)
+      }
     } else {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -179,6 +199,14 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+            {!isSignUp && (
+              <Link
+                href="/forgot-password"
+                className="text-xs font-bold text-red-600 hover:text-red-800 hover:underline"
+              >
+                Quên mật khẩu?
+              </Link>
+            )}
           </div>
 
           {message && (
