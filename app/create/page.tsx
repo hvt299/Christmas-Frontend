@@ -156,8 +156,8 @@ export default function CreateGiftPage() {
         <Snowflake className="absolute bottom-20 right-20 w-32 h-32 text-white animate-bounce" />
       </div>
 
-      {/* 3. KHUNG CHÍNH: LUÔN LUÔN VIỀN VÀNG (border-yellow-500) */}
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border-4 border-yellow-500 relative z-10">
+      {/* KHUNG CHÍNH */}
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border-4 border-yellow-500 relative z-10 my-4">
 
         <Link href="/" className="absolute top-4 left-4 p-2 bg-white/20 hover:bg-black/10 rounded-full transition text-white z-10">
           <ArrowLeft className="w-6 h-6" />
@@ -166,13 +166,13 @@ export default function CreateGiftPage() {
         {/* Header: Đổi màu nền theo theme */}
         <div className={`${currentTheme.headerBg} ${currentTheme.headerText} p-6 text-center transition-colors duration-500`}>
           <Gift className={`w-12 h-12 mx-auto mb-2 animate-bounce ${currentTheme.headerText}`} />
-          <h1 className="text-3xl font-bold font-serif">Gửi Quà Giáng Sinh</h1>
-          <p className="opacity-90">Trao yêu thương, nhận nụ cười</p>
+          <h1 className="text-2xl md:text-3xl font-bold font-serif">Gửi Quà Giáng Sinh</h1>
+          <p className="opacity-90 text-sm md:text-base">Trao yêu thương, nhận nụ cười</p>
         </div>
 
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {createdGiftId ? (
-            /* --- MÀN HÌNH THÀNH CÔNG (Giữ nguyên tính năng copy link) --- */
+            /* --- MÀN HÌNH THÀNH CÔNG --- */
             <div className="text-center animate-fade-in">
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check className="w-10 h-10 text-green-600" />
@@ -191,7 +191,7 @@ export default function CreateGiftPage() {
                 </button>
               </div>
 
-              <div className="flex gap-3 flex-col sm:flex-row">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <a href={`/gifts/${createdGiftId}`} target="_blank" className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-red-900 font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
                   <ExternalLink size={18} /> Xem quà ngay
                 </a>
@@ -288,8 +288,8 @@ export default function CreateGiftPage() {
 
               {/* 3. CHỌN MÀU */}
               <div>
-                <label className="block font-bold text-gray-700 mb-2">Chọn màu hộp quà</label>
-                <div className="flex gap-4">
+                <label className="block font-bold text-gray-700 mb-2 text-sm md:text-base">Chọn màu hộp quà</label>
+                <div className="flex gap-4 flex-wrap">
                   {['red_box', 'green_box', 'gold_box'].map((theme) => (
                     <button
                       key={theme}
@@ -311,8 +311,8 @@ export default function CreateGiftPage() {
                 </div>
               )}
 
-              {/* 4. NÚT BẤM (Layout gốc: Hủy xám, Gửi màu) */}
-              <div className="flex gap-3">
+              {/* 4. NÚT BẤM */}
+              <div className="flex flex-col-reverse sm:flex-row gap-3">
                 <button
                   type="button"
                   onClick={() => router.push('/')}

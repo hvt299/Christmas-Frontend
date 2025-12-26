@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import { Gift, LogOut, User, Snowflake, Clock } from 'lucide-react' // Thêm icon LogOut, User, Snowflake
+import { Gift, LogOut, User, Snowflake, Clock, Settings } from 'lucide-react'
 import ChristmasCountdown from '@/components/ChristmasCountdown'
 
 export default function Home() {
@@ -17,8 +17,11 @@ export default function Home() {
     getUser()
   }, [])
 
+  // Ưu tiên lấy tên từ metadata (đã cập nhật) -> google -> email
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Bạn"
+  const avatarUrl = user?.user_metadata?.avatar_url
 
+  const currentYear = new Date().getFullYear()
   const currentMonth = new Date().getMonth() + 1;
   const isDecember = currentMonth === 12;
 
@@ -26,6 +29,7 @@ export default function Home() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     setUser(null)
+    window.location.reload()
   }
 
   return (
@@ -44,32 +48,44 @@ export default function Home() {
       </div>
 
       {/* 2. TOP BAR (MENU) */}
-      <nav className="relative z-50 flex justify-between items-center px-8 py-6 w-full">
-        {/* Logo bên trái - Đã biến thành Link về trang chủ 👇 */}
+      <nav className="relative z-50 flex justify-between items-center px-4 md:px-8 py-6 w-full">
+        {/* Logo bên trái */}
         <Link
           href="/"
-          className="flex items-center gap-2 text-2xl font-bold font-serif text-yellow-400 hover:text-yellow-200 hover:scale-105 transition cursor-pointer"
+          className="flex items-center gap-2 text-xl md:text-2xl font-bold font-serif text-yellow-400 hover:text-yellow-200 transition cursor-pointer"
         >
           <Snowflake className="w-8 h-8 animate-spin-slow" />
-          <span>Christmas Wishes</span>
+          <span className="hidden sm:inline">Christmas Wishes</span>
         </Link>
 
-        {/* User Info bên phải (Giữ nguyên) */}
+        {/* User Info */}
         <div className="flex items-center gap-4">
           {user ? (
-            <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 shadow-lg">
-              <div className="flex items-center gap-2">
-                <div className="bg-red-600 p-1.5 rounded-full">
-                  <User className="w-4 h-4" />
-                </div>
-                <span className="font-medium hidden sm:block">{displayName}</span>
-              </div>
+            <div className="flex items-center gap-2 bg-black/30 backdrop-blur-md pl-1 pr-2 py-1 rounded-full border border-white/20 shadow-lg">
+              {/* Nút bấm vào Profile */}
+              <Link
+                href="/profile"
+                className="flex items-center gap-3 px-2 py-1 rounded-full hover:bg-white/10 transition group"
+                title="Cài đặt tài khoản"
+              >
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full border border-white/50 object-cover" />
+                ) : (
+                  <div className="bg-red-600 p-1.5 rounded-full">
+                    <User className="w-5 h-5" />
+                  </div>
+                )}
+                <span className="font-medium max-w-[100px] truncate md:max-w-none group-hover:text-yellow-300 transition">
+                  {displayName}
+                </span>
+                <Settings className="w-4 h-4 text-white/50 group-hover:text-white transition" />
+              </Link>
 
-              <div className="h-4 w-[1px] bg-white/30"></div>
+              <div className="h-6 w-[1px] bg-white/20"></div>
 
               <button
                 onClick={handleLogout}
-                className="text-white/80 hover:text-red-400 transition"
+                className="p-2 text-white/70 hover:text-red-400 hover:bg-white/10 rounded-full transition"
                 title="Đăng xuất"
               >
                 <LogOut className="w-5 h-5" />
@@ -90,8 +106,8 @@ export default function Home() {
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] px-4 text-center">
 
         {/* Tiêu đề lớn */}
-        <h1 className="text-6xl md:text-8xl font-bold mb-8 font-serif text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)]">
-          Giáng Sinh 2025
+        <h1 className="text-5xl md:text-8xl font-bold mb-8 font-serif text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)]">
+          Giáng Sinh {currentYear}
         </h1>
 
         {/* Đồng hồ đếm ngược (Component của bạn) */}

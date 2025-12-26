@@ -163,16 +163,15 @@ export default function OpenGiftPage() {
 
                                     {/* 2. Hộp quà: Viền trắng (text-white) + Ruột màu (fill-...) */}
                                     <Gift
-                                        size={220}
                                         strokeWidth={1.5} // Viền mỏng lại chút cho đẹp
-                                        className={`relative z-10 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] ${currentTheme.giftStyle}`}
+                                        className={`relative z-10 w-40 h-40 md:w-56 md:h-56 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] ${currentTheme.giftStyle}`}
                                     />
                                 </motion.div>
 
                                 {/* 2. NÚT BẤM (Style Vàng Kim Loại - Cực kỳ nổi trên nền xanh) */}
                                 <div className="relative z-20 group-hover:scale-105 transition-transform duration-300">
                                     <div className="absolute inset-0 bg-yellow-600 rounded-full blur opacity-50 offset-y-2"></div>
-                                    <p className="relative text-2xl text-red-900 font-bold font-serif animate-bounce text-center bg-gradient-to-b from-yellow-300 to-yellow-500 px-10 py-4 rounded-full border-2 border-yellow-200 shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
+                                    <p className="relative text-lg md:text-2xl text-red-900 font-bold font-serif animate-bounce text-center bg-gradient-to-b from-yellow-300 to-yellow-500 px-6 py-3 md:px-10 md:py-4 rounded-full border-2 border-yellow-200 shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
                                         Chạm để mở quà
                                     </p>
                                 </div>
@@ -185,7 +184,7 @@ export default function OpenGiftPage() {
                                     {/* Nội dung thẻ */}
                                     <div className="bg-white/95 backdrop-blur-sm px-6 py-2 rounded-lg shadow-lg border-2 border-white/20 transform rotate-[-2deg] hover:rotate-0 transition-transform">
                                         <p className="text-gray-500 text-xs uppercase tracking-widest mb-0.5">Gửi tới</p>
-                                        <p className={`text-2xl font-bold ${currentTheme.headerBg.replace('bg-', 'text-')}`}>
+                                        <p className={`text-xl md:text-2xl font-bold ${currentTheme.headerBg.replace('bg-', 'text-')}`}>
                                             {gift.receiverName}
                                         </p>
                                     </div>
@@ -208,11 +207,11 @@ export default function OpenGiftPage() {
                                 <Snowflake className="absolute top-3 left-3 w-6 h-6 opacity-40 animate-spin-slow" />
                                 <Snowflake className="absolute bottom-3 right-3 w-8 h-8 opacity-40 animate-pulse" />
 
-                                <h2 className="text-3xl font-bold font-serif mb-1">Giáng Sinh An Lành</h2>
+                                <h2 className="text-2xl md:text-3xl font-bold font-serif mb-1">Giáng Sinh An Lành</h2>
                                 {/* Đường gạch chân màu accent */}
                                 <div className={`w-16 h-1 mx-auto rounded-full mb-3 opacity-80 bg-current ${currentTheme.accent.replace('text', 'bg')}`}></div>
 
-                                <div className={`flex items-center justify-center gap-2 text-sm py-1 px-4 rounded-full inline-flex backdrop-blur-sm bg-white/10`}>
+                                <div className={`flex flex-wrap items-center justify-center gap-2 text-sm py-1 px-4 rounded-full inline-flex backdrop-blur-sm bg-white/10`}>
                                     <User size={16} />
                                     <span>Người gửi:</span>
                                     <span className={`font-bold text-lg ${currentTheme.accent}`}>
@@ -222,9 +221,9 @@ export default function OpenGiftPage() {
                             </div>
 
                             {/* Nội dung lời chúc (Có padding ở đây) */}
-                            <div className="p-6 md:p-8 text-center">
+                            <div className="p-4 md:p-8 text-center">
                                 <p className="text-gray-500 italic mb-4 font-serif text-sm text-left">Thân gửi {gift.receiverName},</p>
-                                <div className="text-xl md:text-2xl font-handwriting leading-relaxed text-gray-800 mb-8 whitespace-pre-wrap">
+                                <div className="text-lg md:text-2xl font-handwriting leading-relaxed text-gray-800 mb-8 whitespace-pre-wrap">
                                     "{gift.content}"
                                 </div>
 

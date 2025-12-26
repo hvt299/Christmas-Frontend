@@ -18,21 +18,21 @@ export default function MusicPlayer() {
   }, [isPlaying, currentSongUrl]);
 
   return (
-    <div className="fixed bottom-5 left-5 z-50">
+    <div className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-50">
       {/* Thẻ Audio ẩn */}
       <audio ref={audioRef} src={currentSongUrl || ''} loop />
 
       {/* Nút bật tắt nhạc */}
       <button
         onClick={togglePlay}
-        className={`p-3 rounded-full shadow-lg transition-all duration-500 border-2 border-white
+        className={`p-2 md:p-3 rounded-full shadow-lg transition-all duration-500 border-2 border-white
           ${isPlaying ? 'bg-red-600 rotate-180' : 'bg-gray-800'}
         `}
       >
         {isPlaying ? (
-          <Disc3 className="w-8 h-8 text-white animate-spin-slow" /> // Đĩa quay
+          <Disc3 className="w-5 h-5 md:w-8 md:h-8 text-white animate-spin-slow" /> // Đĩa quay
         ) : (
-          <Music2 className="w-8 h-8 text-white" />
+          <Music2 className="w-5 h-5 md:w-8 md:h-8 text-white" />
         )}
       </button>
     </div>
