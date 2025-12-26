@@ -105,29 +105,29 @@ export default function LoginPage() {
 
   // 3. GIAO DIỆN CHÍNH (Chỉ hiện khi chắc chắn chưa đăng nhập)
   return (
-    <div className="min-h-screen flex items-center justify-center bg-red-900 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-red-900 relative overflow-hidden p-4">
       {/* Hiệu ứng nền */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <Snowflake className="absolute top-10 left-10 w-12 h-12 text-white animate-spin-slow" />
         <Snowflake className="absolute bottom-20 right-20 w-16 h-16 text-white animate-bounce" />
       </div>
 
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md z-10 border-4 border-yellow-400 relative animate-fade-in-up">
+      <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md z-10 border-4 border-yellow-400 relative animate-fade-in-up">
         {/* NÚT BACK */}
         <Link
           href="/"
-          className="absolute top-4 left-4 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
+          className="absolute top-3 left-3 md:top-4 md:left-4 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
           title="Quay lại trang chủ"
         >
           <ArrowLeft className="w-6 h-6" />
         </Link>
 
-        <div className="text-center mb-6 mt-4">
-          <Gift className="w-16 h-16 mx-auto text-red-600 mb-2" />
-          <h2 className="text-3xl font-bold text-red-800">
+        <div className="text-center mb-6 mt-6 md:mt-4">
+          <Gift className="w-12 h-12 md:w-16 md:h-16 mx-auto text-red-600 mb-2" />
+          <h2 className="text-2xl md:text-3xl font-bold text-red-800">
             {isSignUp ? 'Đăng Ký Nhận Quà' : 'Đăng Nhập'}
           </h2>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-gray-500 text-xs md:text-sm mt-1">
             {isSignUp ? 'Nhập tên của bạn để Ông già Noel biết nhé!' : 'Chào mừng bạn quay trở lại!'}
           </p>
         </div>

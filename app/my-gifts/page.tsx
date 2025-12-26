@@ -49,7 +49,10 @@ export default function MyGiftsPage() {
                     <Link href="/" className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition">
                         <ArrowLeft className="w-6 h-6" />
                     </Link>
-                    <h1 className="text-3xl font-bold font-serif text-yellow-400">Hộp Quà Của Tôi 🎁</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold font-serif text-yellow-400 flex items-center gap-3">
+                        Hộp Quà Của Tôi
+                        <Gift className="w-8 h-8 md:w-10 md:h-10 text-yellow-400 animate-bounce" />
+                    </h1>
                 </div>
 
                 {/* Loading */}
@@ -72,21 +75,21 @@ export default function MyGiftsPage() {
                 )}
 
                 {/* Danh sách quà */}
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {gifts.map((gift) => (
                         <div key={gift.id} className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-5 hover:bg-white/15 transition flex flex-col">
 
                             <div className="flex justify-between items-start mb-3">
                                 <div className="flex items-center gap-3">
-                                    <div className={`p-3 rounded-lg ${gift.theme === 'green_box' ? 'bg-green-600' : gift.theme === 'gold_box' ? 'bg-yellow-500' : 'bg-red-600'}`}>
+                                    <div className={`flex-shrink-0 p-3 rounded-lg ${gift.theme === 'green_box' ? 'bg-green-600' : gift.theme === 'gold_box' ? 'bg-yellow-500' : 'bg-red-600'}`}>
                                         <Gift className="w-6 h-6 text-white" />
                                     </div>
-                                    <div>
-                                        <p className="text-xs text-white/60 uppercase tracking-wider">Người nhận</p>
-                                        <p className="font-bold text-lg text-yellow-300">{gift.receiverName}</p>
+                                    <div className="min-w-0">
+                                        <p className="text-xs text-white/60 uppercase tracking-wider truncate">Người nhận</p>
+                                        <p className="font-bold text-lg text-yellow-300 truncate">{gift.receiverName}</p>
                                     </div>
                                 </div>
-                                <span className="text-xs text-white/40 bg-black/20 px-2 py-1 rounded">
+                                <span className="flex-shrink-0 text-xs text-white/40 bg-black/20 px-2 py-1 rounded">
                                     {new Date(gift.createdAt).toLocaleDateString('vi-VN')}
                                 </span>
                             </div>
@@ -99,7 +102,7 @@ export default function MyGiftsPage() {
                                 {/* Nút Copy Link */}
                                 <button
                                     onClick={() => handleCopyLink(gift.id)}
-                                    className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 py-2 rounded-lg text-sm font-bold transition"
+                                    className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 py-2 rounded-lg text-sm font-bold transition whitespace-nowrap"
                                 >
                                     {copiedId === gift.id ? (
                                         <><Check className="w-4 h-4 text-green-400" /> Đã copy</>
@@ -111,7 +114,7 @@ export default function MyGiftsPage() {
                                 {/* Nút Xem Quà */}
                                 <Link
                                     href={`/gifts/${gift.id}`}
-                                    className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 py-2 rounded-lg text-sm font-bold transition shadow-md"
+                                    className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 py-2 rounded-lg text-sm font-bold transition shadow-md whitespace-nowrap"
                                 >
                                     <ExternalLink className="w-4 h-4" /> Xem thử
                                 </Link>

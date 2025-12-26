@@ -109,7 +109,7 @@ export default function ProfilePage() {
                 </Link>
 
                 {/* CỘT TRÁI: Avatar Preview */}
-                <div className="md:w-1/3 bg-gradient-to-b from-red-600 to-red-800 p-8 flex flex-col items-center justify-center text-white text-center">
+                <div className="md:w-1/3 bg-gradient-to-b from-red-600 to-red-800 p-6 md:p-8 flex flex-col items-center justify-center text-white text-center">
                     <div className="relative w-32 h-32 mb-4 group">
                         <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-yellow-400 bg-white shadow-lg">
                             {avatarUrl ? (
@@ -129,8 +129,8 @@ export default function ProfilePage() {
                 </div>
 
                 {/* CỘT PHẢI: Form Edit */}
-                <div className="md:w-2/3 p-8 bg-white">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <div className="md:w-2/3 p-5 md:p-8 bg-white">
+                    <h1 className="text-xl md:text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                         <Settings className="text-red-600" /> Cài Đặt Tài Khoản
                     </h1>
 
@@ -176,7 +176,7 @@ export default function ProfilePage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50"
+                            className="w-full md:w-auto justify-center flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50"
                         >
                             {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
                             Lưu Thay Đổi
@@ -219,7 +219,7 @@ export default function ProfilePage() {
                         <button
                             type="submit"
                             disabled={loading || !newPassword}
-                            className="flex items-center gap-2 px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-black transition disabled:opacity-50"
+                            className="w-full md:w-auto justify-center flex items-center gap-2 px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-black transition disabled:opacity-50"
                         >
                             {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Lock className="w-4 h-4" />}
                             Cập Nhật Mật Khẩu
