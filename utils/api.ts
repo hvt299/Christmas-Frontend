@@ -1,8 +1,9 @@
 import { createClient } from '@/utils/supabase/client';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"; // Địa chỉ Backend mới
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-export const apiCall = async (endpoint: string, method: 'GET' | 'POST' = 'GET', body?: any) => {
+export const apiCall = async (endpoint: string, method: HttpMethod = 'GET', body?: any) => {
   const supabase = createClient();
   
   // 1. Lấy Token hiện tại của User
