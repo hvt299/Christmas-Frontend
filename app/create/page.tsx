@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { apiCall } from '@/utils/api'
@@ -72,7 +72,7 @@ const themeMap: Record<string, { headerBg: string, headerText: string, iconColor
   }
 };
 
-export default function CreateGiftPage() {
+function CreateGiftContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const editId = searchParams.get('edit')
@@ -474,5 +474,14 @@ export default function CreateGiftPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CreateGiftPage() {
+  return (
+    // Fallback là cái sẽ hiện ra trong tíc tắc khi NextJS phân tích URL
+    <Suspense fallback={<div className="text-white text-center p-10">Đang tải...</div>}>
+      <CreateGiftContent />
+    </Suspense>
   )
 }
