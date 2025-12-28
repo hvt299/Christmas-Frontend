@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { apiCall } from '@/utils/api'
 import { Gift, Send, Type, Music, ArrowLeft, Copy, Check, ExternalLink, Snowflake, User, Search, X } from 'lucide-react'
@@ -34,6 +34,9 @@ const themeMap: Record<string, { headerBg: string, headerText: string, iconColor
 
 export default function CreateGiftPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const editId = searchParams.get('edit')
+
   const [formData, setFormData] = useState({
     receiverName: '',
     receiverId: '',
@@ -55,6 +58,37 @@ export default function CreateGiftPage() {
 
   // Lấy theme hiện tại
   const currentTheme = themeMap[formData.theme] || themeMap.default;
+
+  // Xử lý khi đang ở chế độ EDIT: Lấy dữ liệu cũ đổ vào form
+  useEffect(() => {
+    if (!editId) return; // Nếu không có editId thì là đang tạo mới -> thoát
+
+    const fetchOldGift = async () => {
+      setLoading(true);
+      try {
+        // Gọi API lấy chi tiết món quà
+        const data = await apiCall(`/gifts/${editId}?view=edit`);
+
+        // Đổ dữ liệu vào State
+        setFormData({
+          receiverName: data.receiverName,
+          receiverId: data.receiverId || '', // Nếu null thì về rỗng
+          content: data.content,
+          theme: data.theme || 'red_box',
+        });
+
+        // Cập nhật cả ô tìm kiếm để hiển thị tên người nhận
+        setSearchQuery(data.receiverName);
+
+      } catch (error) {
+        setMessage('Không tìm thấy món quà cần sửa!');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOldGift();
+  }, [editId]);
 
   // Xử lý tìm kiếm User (Debounce đơn giản)
   useEffect(() => {
@@ -100,7 +134,7 @@ export default function CreateGiftPage() {
         router.push('/');
       }
     };
-    
+
     checkSeason();
   }, [router]);
 
@@ -121,15 +155,22 @@ export default function CreateGiftPage() {
     setMessage('')
 
     try {
+      const isEditMode = !!editId;
+      const endpoint = isEditMode ? `/gifts/${editId}` : '/gifts';
+      const method = isEditMode ? 'PUT' : 'POST';
+
+      const finalReceiverId = (formData.receiverName === searchQuery && formData.receiverId) 
+                              ? formData.receiverId 
+                              : null;
+
       // Gọi API tạo quà sang Backend
-      const result = await apiCall('/gifts', 'POST', {
+      const result = await apiCall(endpoint, method, {
         ...formData,
-        // Nếu người dùng sửa tên sau khi chọn, ta xóa receiverId đi để tránh sai lệch
-        receiverId: formData.receiverName === searchQuery ? formData.receiverId : undefined
+        receiverId: finalReceiverId // Gửi UUID hoặc null (Không gửi undefined)
       })
 
       setCreatedGiftId(result.id)
-      setMessage('Gói quà thành công! Đang chuyển hướng...')
+      setMessage(isEditMode ? 'Cập nhật quà thành công!' : 'Gói quà thành công! Đang chuyển hướng...')
 
     } catch (error: any) {
       setMessage(`Lỗi: ${error.message}`)
@@ -221,7 +262,7 @@ export default function CreateGiftPage() {
                     value={searchQuery || formData.receiverName}
                     onChange={e => {
                       setSearchQuery(e.target.value)
-                      setFormData({ ...formData, receiverName: e.target.value })
+                      setFormData({ ...formData, receiverName: e.target.value, receiverId: '' })
                     }}
                     onFocus={() => searchQuery.length > 1 && setShowDropdown(true)}
                   />
@@ -326,9 +367,10 @@ export default function CreateGiftPage() {
                   disabled={loading}
                   className="flex-[2] bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-lg"
                 >
-                  {loading ? 'Đang gói...' : (
+                  {loading ? (editId ? 'Đang cập nhật...' : 'Đang gói...') : (
                     <>
-                      <Send className="w-6 h-6" /> Gửi Ngay
+                      <Send className="w-6 h-6" />
+                      {editId ? 'Lưu thay đổi' : 'Gửi Ngay'}
                     </>
                   )}
                 </button>
