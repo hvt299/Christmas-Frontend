@@ -157,7 +157,7 @@ export default function MyGiftsPage() {
                             /* --- NỘI DUNG KHI TAB NHẬN TRỐNG --- */
                             <>
                                 <Inbox className="w-16 h-16 mx-auto mb-4 text-white/50" />
-                                <p className="text-xl mb-2">Chưa có ai gửi quà cho bạn (trong hệ thống) cả 😢</p>
+                                <p className="text-xl mb-2">Chưa có ai gửi quà cho bạn cả</p>
                                 <p className="text-sm opacity-60">Hãy rủ bạn bè tham gia để nhận quà nhé!</p>
                             </>
                         )}

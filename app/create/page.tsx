@@ -1,39 +1,82 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { apiCall } from '@/utils/api'
-import { Gift, Send, Type, Music, ArrowLeft, Copy, Check, ExternalLink, Snowflake, User, Search, X } from 'lucide-react'
+import { Gift, Send, Type, Music, ArrowLeft, Copy, Check, ExternalLink, Snowflake, User, Search, X, Smile } from 'lucide-react'
+import EmojiPicker from 'emoji-picker-react';
 
-const themeMap: Record<string, { headerBg: string, headerText: string, iconColor: string, btnColor: string }> = {
+const themeMap: Record<string, { headerBg: string, headerText: string, iconColor: string, btnColor: string, boxColor: string }> = {
   red_box: {
     headerBg: 'bg-red-700',
     headerText: 'text-white',
     iconColor: 'text-red-600',
-    btnColor: 'bg-red-600 hover:bg-red-700'
+    btnColor: 'bg-red-600 hover:bg-red-700',
+    boxColor: 'bg-red-600'
   },
   green_box: {
     headerBg: 'bg-green-700',
     headerText: 'text-white',
     iconColor: 'text-green-600',
-    btnColor: 'bg-green-600 hover:bg-green-700'
+    btnColor: 'bg-green-600 hover:bg-green-700',
+    boxColor: 'bg-green-600'
   },
   gold_box: {
     headerBg: 'bg-yellow-500',
     headerText: 'text-red-900',
     iconColor: 'text-yellow-600',
-    btnColor: 'bg-yellow-500 hover:bg-yellow-600'
+    btnColor: 'bg-yellow-500 hover:bg-yellow-600',
+    boxColor: 'bg-yellow-400'
+  },
+  blue_box: {
+    headerBg: 'bg-blue-600',
+    headerText: 'text-white',
+    iconColor: 'text-blue-500',
+    btnColor: 'bg-blue-500 hover:bg-blue-600',
+    boxColor: 'bg-blue-500'
+  },
+  purple_box: {
+    headerBg: 'bg-purple-700',
+    headerText: 'text-white',
+    iconColor: 'text-purple-600',
+    btnColor: 'bg-purple-600 hover:bg-purple-700',
+    boxColor: 'bg-purple-600'
+  },
+  pink_box: {
+    headerBg: 'bg-pink-500',
+    headerText: 'text-white',
+    iconColor: 'text-pink-500',
+    btnColor: 'bg-pink-500 hover:bg-pink-600',
+    boxColor: 'bg-pink-500'
+  },
+  orange_box: {
+    headerBg: 'bg-orange-500',
+    headerText: 'text-white',
+    iconColor: 'text-orange-600',
+    btnColor: 'bg-orange-500 hover:bg-orange-600',
+    boxColor: 'bg-orange-500'
+  },
+  brown_box: {
+    headerBg: 'bg-amber-900',
+    headerText: 'text-amber-100',
+    iconColor: 'text-amber-800',
+    btnColor: 'bg-amber-800 hover:bg-amber-900',
+    boxColor: 'bg-amber-800'
   },
   default: {
     headerBg: 'bg-red-700',
     headerText: 'text-white',
     iconColor: 'text-red-600',
-    btnColor: 'bg-red-600 hover:bg-red-700'
+    btnColor: 'bg-red-600 hover:bg-red-700',
+    boxColor: 'bg-red-600'
   }
 };
 
-export default function CreateGiftPage() {
+function CreateGiftContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const editId = searchParams.get('edit')
+
   const [formData, setFormData] = useState({
     receiverName: '',
     receiverId: '',
@@ -52,9 +95,49 @@ export default function CreateGiftPage() {
   const [message, setMessage] = useState('')
   const [createdGiftId, setCreatedGiftId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [showEmoji, setShowEmoji] = useState(false);
 
   // Lấy theme hiện tại
   const currentTheme = themeMap[formData.theme] || themeMap.default;
+
+  const onEmojiClick = (emojiObject: any) => {
+    setFormData(prev => ({
+      ...prev,
+      content: prev.content + emojiObject.emoji // Nối emoji vào cuối lời chúc
+    }));
+    // setShowEmoji(false); // Nếu muốn chọn xong tự tắt thì bỏ comment dòng này
+  };
+
+  // Xử lý khi đang ở chế độ EDIT: Lấy dữ liệu cũ đổ vào form
+  useEffect(() => {
+    if (!editId) return; // Nếu không có editId thì là đang tạo mới -> thoát
+
+    const fetchOldGift = async () => {
+      setLoading(true);
+      try {
+        // Gọi API lấy chi tiết món quà
+        const data = await apiCall(`/gifts/${editId}?view=edit`);
+
+        // Đổ dữ liệu vào State
+        setFormData({
+          receiverName: data.receiverName,
+          receiverId: data.receiverId || '', // Nếu null thì về rỗng
+          content: data.content,
+          theme: data.theme || 'red_box',
+        });
+
+        // Cập nhật cả ô tìm kiếm để hiển thị tên người nhận
+        setSearchQuery(data.receiverName);
+
+      } catch (error) {
+        setMessage('Không tìm thấy món quà cần sửa!');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOldGift();
+  }, [editId]);
 
   // Xử lý tìm kiếm User (Debounce đơn giản)
   useEffect(() => {
@@ -100,7 +183,7 @@ export default function CreateGiftPage() {
         router.push('/');
       }
     };
-    
+
     checkSeason();
   }, [router]);
 
@@ -121,15 +204,22 @@ export default function CreateGiftPage() {
     setMessage('')
 
     try {
+      const isEditMode = !!editId;
+      const endpoint = isEditMode ? `/gifts/${editId}` : '/gifts';
+      const method = isEditMode ? 'PUT' : 'POST';
+
+      const finalReceiverId = (formData.receiverName === searchQuery && formData.receiverId)
+        ? formData.receiverId
+        : null;
+
       // Gọi API tạo quà sang Backend
-      const result = await apiCall('/gifts', 'POST', {
+      const result = await apiCall(endpoint, method, {
         ...formData,
-        // Nếu người dùng sửa tên sau khi chọn, ta xóa receiverId đi để tránh sai lệch
-        receiverId: formData.receiverName === searchQuery ? formData.receiverId : undefined
+        receiverId: finalReceiverId // Gửi UUID hoặc null (Không gửi undefined)
       })
 
       setCreatedGiftId(result.id)
-      setMessage('Gói quà thành công! Đang chuyển hướng...')
+      setMessage(isEditMode ? 'Cập nhật quà thành công!' : 'Gói quà thành công! Đang chuyển hướng...')
 
     } catch (error: any) {
       setMessage(`Lỗi: ${error.message}`)
@@ -221,7 +311,7 @@ export default function CreateGiftPage() {
                     value={searchQuery || formData.receiverName}
                     onChange={e => {
                       setSearchQuery(e.target.value)
-                      setFormData({ ...formData, receiverName: e.target.value })
+                      setFormData({ ...formData, receiverName: e.target.value, receiverId: '' })
                     }}
                     onFocus={() => searchQuery.length > 1 && setShowDropdown(true)}
                   />
@@ -276,31 +366,76 @@ export default function CreateGiftPage() {
                   <Music className={`w-5 h-5 ${currentTheme.iconColor}`} />
                   Lời chúc ngọt ngào
                 </label>
-                <textarea
-                  required
-                  rows={4}
-                  className="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-red-500 outline-none transition"
-                  placeholder="Chúc bạn một mùa giáng sinh an lành và..."
-                  value={formData.content}
-                  onChange={e => setFormData({ ...formData, content: e.target.value })}
-                />
+
+                <div className="relative">
+                  <textarea
+                    required
+                    rows={4}
+                    className="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-red-500 outline-none transition"
+                    placeholder="Chúc bạn một mùa giáng sinh an lành và... 🎄"
+                    value={formData.content}
+                    onChange={e => setFormData({ ...formData, content: e.target.value })}
+                  />
+
+                  {/* Nút bật Emoji */}
+                  <button
+                    type="button"
+                    onClick={() => setShowEmoji(!showEmoji)}
+                    className="absolute bottom-3 right-3 text-gray-400 hover:text-yellow-500 transition"
+                  >
+                    <Smile size={24} />
+                  </button>
+
+                  {/* Bảng chọn Emoji */}
+                  {showEmoji && (
+                    <div className="absolute bottom-full right-0 mb-2 z-50 shadow-xl">
+                      {/* Click ra ngoài để tắt (Overlay vô hình) */}
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setShowEmoji(false)}
+                      />
+
+                      {/* Component Picker */}
+                      <div className="relative z-50">
+                        <EmojiPicker
+                          onEmojiClick={onEmojiClick}
+                          width={300}
+                          height={350}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* 3. CHỌN MÀU */}
               <div>
                 <label className="block font-bold text-gray-700 mb-2 text-sm md:text-base">Chọn màu hộp quà</label>
-                <div className="flex gap-4 flex-wrap">
-                  {['red_box', 'green_box', 'gold_box'].map((theme) => (
-                    <button
-                      key={theme}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, theme })}
-                      className={`w-12 h-12 rounded-full border-4 shadow-sm transition-transform hover:scale-110 
-                            ${formData.theme === theme ? 'border-blue-500 scale-110' : 'border-transparent'}
-                            ${theme === 'red_box' ? 'bg-red-600' : theme === 'green_box' ? 'bg-green-600' : 'bg-yellow-400'}
-                            `}
-                    />
-                  ))}
+                <div className="flex gap-4 flex-wrap justify-center sm:justify-start">
+                  {[
+                    'red_box',
+                    'green_box',
+                    'gold_box',
+                    'blue_box',
+                    'purple_box',
+                    'pink_box',
+                    'orange_box',
+                    'brown_box'
+                  ].map((theme) => {
+                    const themeConfig = themeMap[theme] || themeMap.default;
+                    return (
+                      <button
+                        key={theme}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, theme })}
+                        className={`w-12 h-12 rounded-full border-4 shadow-sm transition-transform hover:scale-110 
+                          ${formData.theme === theme ? 'border-black-100 scale-110' : 'border-transparent'}
+                          ${themeConfig.boxColor} 
+                        `}
+                        title={theme.replace('_box', '')} // Tooltip hiện tên màu
+                      />
+                    );
+                  })}
                 </div>
               </div>
 
@@ -326,9 +461,10 @@ export default function CreateGiftPage() {
                   disabled={loading}
                   className="flex-[2] bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-lg"
                 >
-                  {loading ? 'Đang gói...' : (
+                  {loading ? (editId ? 'Đang cập nhật...' : 'Đang gói...') : (
                     <>
-                      <Send className="w-6 h-6" /> Gửi Ngay
+                      <Send className="w-6 h-6" />
+                      {editId ? 'Lưu thay đổi' : 'Gửi Ngay'}
                     </>
                   )}
                 </button>
@@ -338,5 +474,14 @@ export default function CreateGiftPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CreateGiftPage() {
+  return (
+    // Fallback là cái sẽ hiện ra trong tíc tắc khi NextJS phân tích URL
+    <Suspense fallback={<div className="text-white text-center p-10">Đang tải...</div>}>
+      <CreateGiftContent />
+    </Suspense>
   )
 }
