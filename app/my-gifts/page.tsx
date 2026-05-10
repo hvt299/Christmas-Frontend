@@ -1,11 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { apiCall } from '@/utils/api'
+import api from '@/lib/api'
 import Link from 'next/link'
 import { Gift, Copy, Check, ExternalLink, ArrowLeft, Snowflake } from 'lucide-react'
-
-// URL Frontend để tạo link chia sẻ
-const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000'
 
 export default function MyGiftsPage() {
     const [gifts, setGifts] = useState<any[]>([])
@@ -15,11 +12,10 @@ export default function MyGiftsPage() {
     useEffect(() => {
         const fetchGifts = async () => {
             try {
-                // Gọi API lấy danh sách (Hàm apiCall đã tự đính kèm Token)
-                const data = await apiCall('/gifts')
-                setGifts(data)
+                const res = await api.get('/gifts')
+                setGifts(res.data)
             } catch (error) {
-                console.error(error)
+                console.error('Lỗi khi tải danh sách quà:', error)
             } finally {
                 setLoading(false)
             }
@@ -31,7 +27,7 @@ export default function MyGiftsPage() {
         const link = `${window.location.origin}/gifts/${giftId}`
         navigator.clipboard.writeText(link)
         setCopiedId(giftId)
-        setTimeout(() => setCopiedId(null), 2000) // Reset icon sau 2s
+        setTimeout(() => setCopiedId(null), 2000)
     }
 
     return (
@@ -76,51 +72,55 @@ export default function MyGiftsPage() {
 
                 {/* Danh sách quà */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    {gifts.map((gift) => (
-                        <div key={gift.id} className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-5 hover:bg-white/15 transition flex flex-col">
+                    {gifts.map((gift) => {
+                        const giftId = gift._id || gift.id;
 
-                            <div className="flex justify-between items-start mb-3">
-                                <div className="flex items-center gap-3">
-                                    <div className={`flex-shrink-0 p-3 rounded-lg ${gift.theme === 'green_box' ? 'bg-green-600' : gift.theme === 'gold_box' ? 'bg-yellow-500' : 'bg-red-600'}`}>
-                                        <Gift className="w-6 h-6 text-white" />
+                        return (
+                            <div key={giftId} className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-5 hover:bg-white/15 transition flex flex-col">
+
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`shrink-0 p-3 rounded-lg ${gift.theme === 'green_box' ? 'bg-green-600' : gift.theme === 'gold_box' ? 'bg-yellow-500' : 'bg-red-600'}`}>
+                                            <Gift className="w-6 h-6 text-white" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-xs text-white/60 uppercase tracking-wider truncate">Người nhận</p>
+                                            <p className="font-bold text-lg text-yellow-300 truncate">{gift.receiverName}</p>
+                                        </div>
                                     </div>
-                                    <div className="min-w-0">
-                                        <p className="text-xs text-white/60 uppercase tracking-wider truncate">Người nhận</p>
-                                        <p className="font-bold text-lg text-yellow-300 truncate">{gift.receiverName}</p>
-                                    </div>
+                                    <span className="shrink-0 text-xs text-white/40 bg-black/20 px-2 py-1 rounded">
+                                        {new Date(gift.createdAt).toLocaleDateString('vi-VN')}
+                                    </span>
                                 </div>
-                                <span className="flex-shrink-0 text-xs text-white/40 bg-black/20 px-2 py-1 rounded">
-                                    {new Date(gift.createdAt).toLocaleDateString('vi-VN')}
-                                </span>
+
+                                <p className="text-sm text-white/80 italic mb-4 line-clamp-2">
+                                    "{gift.content}"
+                                </p>
+
+                                <div className="mt-auto pt-4 border-t border-white/10 flex gap-2">
+                                    {/* Nút Copy Link */}
+                                    <button
+                                        onClick={() => handleCopyLink(giftId)}
+                                        className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 py-2 rounded-lg text-sm font-bold transition whitespace-nowrap"
+                                    >
+                                        {copiedId === giftId ? (
+                                            <><Check className="w-4 h-4 text-green-400" /> Đã copy</>
+                                        ) : (
+                                            <><Copy className="w-4 h-4" /> Copy Link</>
+                                        )}
+                                    </button>
+
+                                    {/* Nút Xem Quà */}
+                                    <Link
+                                        href={`/gifts/${giftId}`}
+                                        className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 py-2 rounded-lg text-sm font-bold transition shadow-md whitespace-nowrap"
+                                    >
+                                        <ExternalLink className="w-4 h-4" /> Xem thử
+                                    </Link>
+                                </div>
                             </div>
-
-                            <p className="text-sm text-white/80 italic mb-4 line-clamp-2">
-                                "{gift.content}"
-                            </p>
-
-                            <div className="mt-auto pt-4 border-t border-white/10 flex gap-2">
-                                {/* Nút Copy Link */}
-                                <button
-                                    onClick={() => handleCopyLink(gift.id)}
-                                    className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 py-2 rounded-lg text-sm font-bold transition whitespace-nowrap"
-                                >
-                                    {copiedId === gift.id ? (
-                                        <><Check className="w-4 h-4 text-green-400" /> Đã copy</>
-                                    ) : (
-                                        <><Copy className="w-4 h-4" /> Copy Link</>
-                                    )}
-                                </button>
-
-                                {/* Nút Xem Quà */}
-                                <Link
-                                    href={`/gifts/${gift.id}`}
-                                    className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 py-2 rounded-lg text-sm font-bold transition shadow-md whitespace-nowrap"
-                                >
-                                    <ExternalLink className="w-4 h-4" /> Xem thử
-                                </Link>
-                            </div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
             </div>
         </div>

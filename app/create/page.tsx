@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { apiCall } from '@/utils/api'
+import api from '@/lib/api'
 import { Gift, Send, Type, Music, ArrowLeft, Copy, Check, ExternalLink, Snowflake, User, Search, X } from 'lucide-react'
 
 const themeMap: Record<string, { headerBg: string, headerText: string, iconColor: string, btnColor: string }> = {
@@ -41,35 +41,29 @@ export default function CreateGiftPage() {
     theme: 'red_box',
   })
 
-  // State tìm kiếm
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
 
-  // State UI
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [createdGiftId, setCreatedGiftId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
-  // Lấy theme hiện tại
   const currentTheme = themeMap[formData.theme] || themeMap.default;
 
-  // Xử lý tìm kiếm User (Debounce đơn giản)
   useEffect(() => {
     let isMounted = true;
     const timer = setTimeout(async () => {
       if (searchQuery.trim().length > 0) {
         setIsSearching(true)
         try {
-          const users = await apiCall(`/gifts/search-users?q=${encodeURIComponent(searchQuery)}`)
-          if (isMounted) {
-            // Ép kiểu chắc chắn là mảng để map không lỗi
-            const usersArray = Array.isArray(users) ? users : [];
-            setSearchResults(usersArray)
+          const response = await api.get(`/users/search?q=${encodeURIComponent(searchQuery)}`)
 
-            // Chỉ hiện dropdown nếu thực sự có kết quả trả về
+          if (isMounted) {
+            const usersArray = Array.isArray(response.data) ? response.data : [];
+            setSearchResults(usersArray)
             setShowDropdown(usersArray.length > 0)
           }
         } catch (error) {
@@ -93,25 +87,23 @@ export default function CreateGiftPage() {
 
   useEffect(() => {
     const checkSeason = () => {
-      const currentMonth = new Date().getMonth() + 1; // 1-12
-      // Nếu không phải tháng 12 -> Đá về trang chủ
+      const currentMonth = new Date().getMonth() + 1;
       if (currentMonth !== 12) {
         alert("Ho ho ho! Cỗ xe tuần lộc chưa khởi hành. Hãy quay lại vào tháng 12 nhé! 🎅");
         router.push('/');
       }
     };
-    
     checkSeason();
   }, [router]);
 
-  // Hàm chọn user từ dropdown
   const selectUser = (user: any) => {
+    const displayName = user.fullName || user.username;
     setFormData({
       ...formData,
-      receiverName: user.displayName,
-      receiverId: user.id
+      receiverName: displayName,
+      receiverId: user._id
     })
-    setSearchQuery(user.displayName)
+    setSearchQuery(displayName)
     setShowDropdown(false)
   }
 
@@ -121,18 +113,17 @@ export default function CreateGiftPage() {
     setMessage('')
 
     try {
-      // Gọi API tạo quà sang Backend
-      const result = await apiCall('/gifts', 'POST', {
+      const response = await api.post('/gifts', {
         ...formData,
-        // Nếu người dùng sửa tên sau khi chọn, ta xóa receiverId đi để tránh sai lệch
         receiverId: formData.receiverName === searchQuery ? formData.receiverId : undefined
       })
 
-      setCreatedGiftId(result.id)
+      setCreatedGiftId(response.data._id || response.data.id)
       setMessage('Gói quà thành công! Đang chuyển hướng...')
 
     } catch (error: any) {
-      setMessage(`Lỗi: ${error.message}`)
+      const errorMsg = error.response?.data?.message || error.message;
+      setMessage(Array.isArray(errorMsg) ? errorMsg[0] : errorMsg);
     } finally {
       setLoading(false)
     }
@@ -140,7 +131,6 @@ export default function CreateGiftPage() {
 
   const handleCopyLink = () => {
     if (!createdGiftId) return
-    // Tạo link đầy đủ dựa trên domain hiện tại
     const link = `${window.location.origin}/gifts/${createdGiftId}`
     navigator.clipboard.writeText(link)
     setCopied(true)
@@ -156,14 +146,13 @@ export default function CreateGiftPage() {
         <Snowflake className="absolute bottom-20 right-20 w-32 h-32 text-white animate-bounce" />
       </div>
 
-      {/* KHUNG CHÍNH */}
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border-4 border-yellow-500 relative z-10 my-4">
 
         <Link href="/" className="absolute top-4 left-4 p-2 bg-white/20 hover:bg-black/10 rounded-full transition text-white z-10">
           <ArrowLeft className="w-6 h-6" />
         </Link>
 
-        {/* Header: Đổi màu nền theo theme */}
+        {/* Header */}
         <div className={`${currentTheme.headerBg} ${currentTheme.headerText} p-6 text-center transition-colors duration-500`}>
           <Gift className={`w-12 h-12 mx-auto mb-2 animate-bounce ${currentTheme.headerText}`} />
           <h1 className="text-2xl md:text-3xl font-bold font-serif">Gửi Quà Giáng Sinh</h1>
@@ -172,7 +161,7 @@ export default function CreateGiftPage() {
 
         <div className="p-4 md:p-8">
           {createdGiftId ? (
-            /* --- MÀN HÌNH THÀNH CÔNG --- */
+            /* MÀN HÌNH THÀNH CÔNG */
             <div className="text-center animate-fade-in">
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check className="w-10 h-10 text-green-600" />
@@ -185,7 +174,7 @@ export default function CreateGiftPage() {
                 </code>
                 <button
                   onClick={handleCopyLink}
-                  className="bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg border border-gray-300 font-bold text-sm transition flex items-center gap-1 min-w-[100px] justify-center"
+                  className="bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg border border-gray-300 font-bold text-sm transition flex items-center gap-1 min-w-25 justify-center"
                 >
                   {copied ? <><Check size={14} className="text-green-500" /> Đã chép</> : <><Copy size={14} /> Copy</>}
                 </button>
@@ -201,13 +190,11 @@ export default function CreateGiftPage() {
               </div>
             </div>
           ) : (
-            /* --- FORM NHẬP LIỆU (Layout gốc) --- */
+            /* FORM NHẬP LIỆU */
             <form onSubmit={handleSubmit} className="space-y-6">
 
-              {/* 1. Ô NHẬP TÊN (Có tìm kiếm + Placeholder gốc) */}
               <div className="relative">
                 <label className="flex items-center gap-2 font-bold text-gray-700 mb-2">
-                  {/* Icon đổi màu theo theme */}
                   <Type className={`w-5 h-5 ${currentTheme.iconColor}`} />
                   Người nhận là ai?
                 </label>
@@ -216,7 +203,6 @@ export default function CreateGiftPage() {
                     type="text"
                     required
                     className="w-full border-2 border-gray-200 rounded-lg p-3 pl-10 focus:border-red-500 outline-none transition"
-                    // Placeholder giữ nguyên như bạn thích
                     placeholder="Nhập tên bạn bè (hoặc tên tài khoản nếu có)..."
                     value={searchQuery || formData.receiverName}
                     onChange={e => {
@@ -227,7 +213,6 @@ export default function CreateGiftPage() {
                   />
                   <Search className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
 
-                  {/* Loading spinner nhỏ khi tìm kiếm */}
                   {isSearching && (
                     <div className="absolute right-3 top-3.5 animate-spin w-5 h-5 border-2 border-gray-300 border-t-red-500 rounded-full"></div>
                   )}
@@ -243,24 +228,24 @@ export default function CreateGiftPage() {
                   )}
                 </div>
 
-                {/* DROPDOWN KẾT QUẢ */}
+                {/* DROPDOWN KẾT QUẢ TÌM KIẾM */}
                 {showDropdown && searchResults.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border-2 border-yellow-400 rounded-b-xl shadow-2xl z-[100] max-h-60 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 bg-white border-2 border-yellow-400 rounded-b-xl shadow-2xl z-100 max-h-60 overflow-y-auto">
                     {searchResults.map(user => (
                       <div
-                        key={user.id}
+                        key={user._id}
                         onClick={() => selectUser(user)}
                         className="p-3 hover:bg-yellow-50 cursor-pointer flex items-center gap-3 transition border-b border-gray-50 last:border-0"
                       >
                         <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold overflow-hidden">
-                          {user.avatarUrl ? (
-                            <img src={user.avatarUrl} alt={user.displayName} className="w-full h-full object-cover" />
+                          {user.avatar ? (
+                            <img src={user.avatar} alt={user.fullName} className="w-full h-full object-cover" />
                           ) : (
-                            user.displayName?.charAt(0) || <User size={16} />
+                            (user.fullName || user.username)?.charAt(0) || <User size={16} />
                           )}
                         </div>
                         <div>
-                          <p className="font-bold text-gray-800">{user.displayName}</p>
+                          <p className="font-bold text-gray-800">{user.fullName || user.username}</p>
                           <p className="text-xs text-gray-500">{user.email}</p>
                         </div>
                         <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Thành viên</span>
@@ -270,7 +255,6 @@ export default function CreateGiftPage() {
                 )}
               </div>
 
-              {/* 2. Ô LỜI CHÚC */}
               <div>
                 <label className="flex items-center gap-2 font-bold text-gray-700 mb-2">
                   <Music className={`w-5 h-5 ${currentTheme.iconColor}`} />
@@ -286,7 +270,6 @@ export default function CreateGiftPage() {
                 />
               </div>
 
-              {/* 3. CHỌN MÀU */}
               <div>
                 <label className="block font-bold text-gray-700 mb-2 text-sm md:text-base">Chọn màu hộp quà</label>
                 <div className="flex gap-4 flex-wrap">
@@ -304,14 +287,12 @@ export default function CreateGiftPage() {
                 </div>
               </div>
 
-              {/* THÔNG BÁO LỖI */}
               {message && !createdGiftId && (
                 <div className="p-4 rounded-lg text-center font-bold bg-red-100 text-red-800 animate-pulse">
                   {message}
                 </div>
               )}
 
-              {/* 4. NÚT BẤM */}
               <div className="flex flex-col-reverse sm:flex-row gap-3">
                 <button
                   type="button"
@@ -324,7 +305,7 @@ export default function CreateGiftPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-[2] bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-lg"
+                  className="flex-2 bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-lg"
                 >
                   {loading ? 'Đang gói...' : (
                     <>

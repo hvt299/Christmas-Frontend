@@ -28,9 +28,7 @@ export default function Home() {
   const currentMonth = new Date().getMonth() + 1;
   const isDecember = currentMonth === 12;
 
-  // Hàm xử lý Logout mới
   const handleLogout = () => {
-    // Xóa mọi dấu vết của token
     localStorage.removeItem('access_token')
     localStorage.removeItem('user_info')
     Cookies.remove('access_token')
@@ -46,8 +44,7 @@ export default function Home() {
       <div
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transform scale-105"
         style={{
-          // Ảnh nền cây thông Noel chất lượng cao từ Unsplash
-          backgroundImage: "url('https://t4.ftcdn.net/jpg/17/72/71/03/360_F_1772710342_2zVjZvvhWiFQINDWYSyPokQb1qagKbH8.jpg')"
+          backgroundImage: "url('/images/bg-merry-christmas.jpg')"
         }}
       >
         {/* Lớp phủ đen mờ để chữ dễ đọc hơn */}
