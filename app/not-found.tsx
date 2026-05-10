@@ -22,7 +22,7 @@ export default function NotFound() {
                 </div>
 
                 {/* Số 404 lớn */}
-                <h1 className="text-8xl md:text-9xl font-bold font-serif text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 drop-shadow-lg mb-2">
+                <h1 className="text-8xl md:text-9xl font-bold font-serif text-transparent bg-clip-text bg-linear-to-b from-yellow-300 to-yellow-600 drop-shadow-lg mb-2">
                     404
                 </h1>
 

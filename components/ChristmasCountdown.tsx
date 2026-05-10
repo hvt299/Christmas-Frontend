@@ -65,7 +65,7 @@ export default function ChristmasCountdown() {
         {['Ngày', 'Giờ', 'Phút', 'Giây'].map((label, idx) => {
            const value = Object.values(timeLeft)[idx]
            return (
-             <div key={label} className="bg-red-900/80 backdrop-blur-sm border border-yellow-500/50 p-3 rounded-lg min-w-[70px] shadow-lg">
+             <div key={label} className="bg-red-900/80 backdrop-blur-sm border border-yellow-500/50 p-3 rounded-lg min-w-17.5 shadow-lg">
                <div className="text-3xl font-bold text-white font-mono">
                  {value.toString().padStart(2, '0')}
                </div>

@@ -1,33 +1,40 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { Gift, LogOut, User, Snowflake, Clock, Settings } from 'lucide-react'
 import ChristmasCountdown from '@/components/ChristmasCountdown'
+import Cookies from 'js-cookie'
 
 export default function Home() {
   const [user, setUser] = useState<any>(null)
-  const supabase = createClient()
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
+    const userInfo = localStorage.getItem('user_info')
+    const token = localStorage.getItem('access_token')
+
+    if (userInfo && token) {
+      try {
+        setUser(JSON.parse(userInfo))
+      } catch (error) {
+        console.error('Lỗi khi đọc dữ liệu user:', error)
+      }
     }
-    getUser()
   }, [])
 
-  // Ưu tiên lấy tên từ metadata (đã cập nhật) -> google -> email
-  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Bạn"
-  const avatarUrl = user?.user_metadata?.avatar_url
+  const displayName = user?.fullName || user?.username || "Bạn"
+  const avatarUrl = user?.avatar
 
   const currentYear = new Date().getFullYear()
   const currentMonth = new Date().getMonth() + 1;
   const isDecember = currentMonth === 12;
 
-  // Hàm xử lý Logout
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
+  // Hàm xử lý Logout mới
+  const handleLogout = () => {
+    // Xóa mọi dấu vết của token
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('user_info')
+    Cookies.remove('access_token')
+
     setUser(null)
     window.location.reload()
   }
@@ -75,13 +82,13 @@ export default function Home() {
                     <User className="w-5 h-5" />
                   </div>
                 )}
-                <span className="font-medium max-w-[100px] truncate md:max-w-none group-hover:text-yellow-300 transition">
+                <span className="font-medium max-w-25 truncate md:max-w-none group-hover:text-yellow-300 transition">
                   {displayName}
                 </span>
                 <Settings className="w-4 h-4 text-white/50 group-hover:text-white transition" />
               </Link>
 
-              <div className="h-6 w-[1px] bg-white/20"></div>
+              <div className="h-6 w-px bg-white/20"></div>
 
               <button
                 onClick={handleLogout}
@@ -106,7 +113,7 @@ export default function Home() {
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] px-4 text-center">
 
         {/* Tiêu đề lớn */}
-        <h1 className="text-5xl md:text-8xl font-bold mb-8 font-serif text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)]">
+        <h1 className="text-5xl md:text-8xl font-bold mb-8 font-serif text-transparent bg-clip-text bg-linear-to-b from-yellow-300 to-yellow-600 drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)]">
           Giáng Sinh {currentYear}
         </h1>
 
