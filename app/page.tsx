@@ -1,12 +1,13 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Gift, LogOut, User, Snowflake, Clock, Settings } from 'lucide-react'
+import { Gift, LogOut, User, Snowflake, Clock, Settings, X } from 'lucide-react'
 import ChristmasCountdown from '@/components/ChristmasCountdown'
 import Cookies from 'js-cookie'
 
 export default function Home() {
   const [user, setUser] = useState<any>(null)
+  const [showPopup, setShowPopup] = useState(false) // State quản lý hiển thị popup
 
   useEffect(() => {
     const userInfo = localStorage.getItem('user_info')
@@ -18,6 +19,12 @@ export default function Home() {
       } catch (error) {
         console.error('Lỗi khi đọc dữ liệu user:', error)
       }
+    } else {
+      // Logic Popup: Chỉ hiện khi CHƯA đăng nhập, delay 1 giây để user kịp ngắm giao diện
+      const timer = setTimeout(() => {
+        setShowPopup(true)
+      }, 1000)
+      return () => clearTimeout(timer)
     }
   }, [])
 
@@ -47,13 +54,11 @@ export default function Home() {
           backgroundImage: "url('/images/bg-merry-christmas.jpg')"
         }}
       >
-        {/* Lớp phủ đen mờ để chữ dễ đọc hơn */}
         <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
       </div>
 
       {/* 2. TOP BAR (MENU) */}
       <nav className="relative z-50 flex justify-between items-center px-4 md:px-8 py-6 w-full">
-        {/* Logo bên trái */}
         <Link
           href="/"
           className="flex items-center gap-2 text-xl md:text-2xl font-bold font-serif text-yellow-400 hover:text-yellow-200 transition cursor-pointer"
@@ -62,11 +67,9 @@ export default function Home() {
           <span className="hidden sm:inline">Christmas Wishes</span>
         </Link>
 
-        {/* User Info */}
         <div className="flex items-center gap-4">
           {user ? (
             <div className="flex items-center gap-2 bg-black/30 backdrop-blur-md pl-1 pr-2 py-1 rounded-full border border-white/20 shadow-lg">
-              {/* Nút bấm vào Profile */}
               <Link
                 href="/profile"
                 className="flex items-center gap-3 px-2 py-1 rounded-full hover:bg-white/10 transition group"
@@ -106,20 +109,17 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 3. CENTER CONTENT (Nội dung chính) */}
+      {/* 3. CENTER CONTENT */}
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] px-4 text-center">
 
-        {/* Tiêu đề lớn */}
         <h1 className="text-5xl md:text-8xl font-bold mb-8 font-serif text-transparent bg-clip-text bg-linear-to-b from-yellow-300 to-yellow-600 drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)]">
           Giáng Sinh {currentYear}
         </h1>
 
-        {/* Đồng hồ đếm ngược (Component của bạn) */}
         <div className="mb-6 scale-110">
           <ChristmasCountdown />
         </div>
 
-        {/* Khu vực nút hành động (Call to Action) */}
         {user ? (
           <div className="animate-fade-in-up flex flex-col items-center gap-4">
             {isDecember ? (
@@ -129,8 +129,6 @@ export default function Home() {
               >
                 <Gift className="w-6 h-6 animate-bounce" />
                 <span>Gửi Món Quà Mới</span>
-
-                {/* Hiệu ứng hào quang khi hover */}
                 <div className="absolute inset-0 rounded-2xl ring-4 ring-white/30 group-hover:ring-white/50 transition-all"></div>
               </Link>
             ) : (
@@ -150,7 +148,6 @@ export default function Home() {
               </p>
             )}
 
-            {/* Xem danh sách quà */}
             <Link
               href="/my-gifts"
               className="text-yellow-300 hover:text-yellow-100 font-bold underline decoration-dotted underline-offset-4 flex items-center gap-2 transition"
@@ -173,10 +170,40 @@ export default function Home() {
         )}
       </main>
 
-      {/* Footer nhỏ (Optional) */}
       <footer className="absolute bottom-4 w-full text-center text-white/40 text-xs z-10">
         Designed with ❤️ for Christmas by hvt299
       </footer>
+
+      {/* 4. POPUP MỜI ĐĂNG NHẬP (Hiển thị khi showPopup = true) */}
+      {showPopup && !user && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-red-900 border-4 border-yellow-400 p-8 rounded-3xl shadow-2xl relative max-w-sm w-full text-center transform transition-all scale-100">
+
+            {/* Nút Close góc trên phải */}
+            <button
+              onClick={() => setShowPopup(false)}
+              className="absolute top-3 right-3 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full p-1 transition"
+              title="Đóng"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Nội dung Popup */}
+            <Gift className="w-16 h-16 mx-auto mb-4 text-yellow-300 animate-bounce" />
+            <h2 className="text-2xl font-bold font-serif text-white mb-2">Trạm Quà Giáng Sinh</h2>
+            <p className="text-red-100 mb-6 text-sm">
+              Đăng nhập ngay để tự tay gói những hộp quà bí mật gửi tặng người thân yêu nhé! 🎅🎁
+            </p>
+
+            <Link
+              href="/login"
+              className="inline-block bg-yellow-400 text-red-900 px-6 py-3 rounded-full font-bold shadow-lg hover:bg-yellow-300 hover:scale-105 transition w-full"
+            >
+              Đăng nhập / Đăng ký
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
