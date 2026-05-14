@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, Suspense } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import api from '@/lib/api'
 import { Gift, Send, Type, Music, ArrowLeft, Copy, Check, ExternalLink, Snowflake, User, Search, X, Smile } from 'lucide-react'
@@ -90,6 +90,8 @@ function CreateGiftContent() {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
+  const searchParams = useSearchParams()
+  const editId = searchParams.get('edit')
   const [showDropdown, setShowDropdown] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
 
@@ -367,7 +369,6 @@ function CreateGiftContent() {
                     'brown_box'
                   ].map((theme) => {
                     const themeConfig = themeMap[theme] || themeMap.default;
-
                     return (
                       <button
                         key={theme}
@@ -404,9 +405,10 @@ function CreateGiftContent() {
                   disabled={loading}
                   className="flex-2 bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-lg"
                 >
-                  {loading ? 'Đang gói...' : (
+                  {loading ? (editId ? 'Đang cập nhật...' : 'Đang gói...') : (
                     <>
-                      <Send className="w-6 h-6" /> Gửi Ngay
+                      <Send className="w-6 h-6" />
+                      {editId ? 'Lưu thay đổi' : 'Gửi Ngay'}
                     </>
                   )}
                 </button>

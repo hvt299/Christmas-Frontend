@@ -2,12 +2,22 @@
 import { useEffect, useState } from 'react'
 import api from '@/lib/api'
 import Link from 'next/link'
-import { Gift, Copy, Check, ExternalLink, ArrowLeft, Snowflake } from 'lucide-react'
+import {
+    Gift, Copy, Check, ExternalLink, ArrowLeft, Snowflake,
+    Trash2, Edit2, Calendar, Inbox, Send
+} from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function MyGiftsPage() {
+    const router = useRouter()
+
     const [gifts, setGifts] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [copiedId, setCopiedId] = useState<string | null>(null)
+
+    const [userId, setUserId] = useState<string | null>(null) // Để biết mình là người gửi hay nhận
+    const [activeTab, setActiveTab] = useState<'sent' | 'received'>('sent') // Tab hiện tại
+    const [selectedYear, setSelectedYear] = useState<string>('all') // Năm được chọn
 
     useEffect(() => {
         const fetchGifts = async () => {
@@ -21,7 +31,30 @@ export default function MyGiftsPage() {
             }
         }
         fetchGifts()
-    }, [])
+    }, [router])
+
+    const mySentGifts = gifts.filter(g => g.senderId === userId)
+    const myReceivedGifts = gifts.filter(g => g.receiverId === userId)
+    const currentList = activeTab === 'sent' ? mySentGifts : myReceivedGifts
+
+    const years = Array.from(new Set(currentList.map(g => new Date(g.createdAt).getFullYear().toString())))
+    const filteredGifts = selectedYear === 'all'
+        ? currentList
+        : currentList.filter(g => new Date(g.createdAt).getFullYear().toString() === selectedYear)
+
+    const handleDelete = async (giftId: string) => {
+        if (!window.confirm('Bạn có chắc muốn xóa vĩnh viễn món quà này?')) return
+        try {
+            await api.delete(`/gifts/${giftId}`) // Gọi API Delete
+            setGifts(prev => prev.filter(g => g.id !== giftId)) // Cập nhật UI
+        } catch (err) {
+            alert('Lỗi khi xóa quà')
+        }
+    }
+
+    const handleEdit = (giftId: string) => {
+        router.push(`/create?edit=${giftId}`) // Chuyển sang trang tạo với ID để sửa
+    }
 
     const handleCopyLink = (giftId: string) => {
         const link = `${window.location.origin}/gifts/${giftId}`
@@ -41,14 +74,49 @@ export default function MyGiftsPage() {
 
             <div className="max-w-4xl mx-auto relative z-10">
                 {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
-                    <Link href="/" className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition">
-                        <ArrowLeft className="w-6 h-6" />
-                    </Link>
-                    <h1 className="text-2xl md:text-3xl font-bold font-serif text-yellow-400 flex items-center gap-3">
-                        Hộp Quà Của Tôi
-                        <Gift className="w-8 h-8 md:w-10 md:h-10 text-yellow-400 animate-bounce" />
-                    </h1>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                    <div className="flex items-center gap-3">
+                        <Link href="/" className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition">
+                            <ArrowLeft className="w-6 h-6" />
+                        </Link>
+                        <h1 className="text-2xl md:text-3xl font-bold font-serif text-yellow-400 flex items-center gap-3">
+                            Hộp Quà Của Tôi
+                            <Gift className="w-6 h-6 md:w-8 md:h-8 animate-bounce" />
+                        </h1>
+                    </div>
+
+                    {/* TAB SWITCHER & YEAR FILTER */}
+                    <div className="flex flex-col sm:flex-row gap-3">
+
+                        {/* Tab Năm */}
+                        <div className="relative shrink-0">
+                            <Calendar className="absolute left-3 top-2.5 w-4 h-4 text-white/60" />
+                            <select
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(e.target.value)}
+                                className="w-full sm:w-auto appearance-none bg-black/20 text-white pl-9 pr-8 py-2 rounded-lg border border-white/10 focus:outline-none focus:border-yellow-400 cursor-pointer"
+                            >
+                                <option value="all" className="bg-green-800">Tất cả năm</option>
+                                {years.map(y => <option key={y} value={y} className="bg-green-800">{y}</option>)}
+                            </select>
+                        </div>
+
+                        {/* Tabs Gửi/Nhận */}
+                        <div className="bg-black/20 p-1 rounded-lg flex shrink-0 whitespace-nowrap overflow-x-auto">
+                            <button
+                                onClick={() => { setActiveTab('sent'); setSelectedYear('all') }}
+                                className={`flex-1 flex items-center justify-center gap-2 px-4 py-1.5 rounded-md text-sm font-bold transition ${activeTab === 'sent' ? 'bg-red-600 shadow' : 'text-white/50 hover:text-white'}`}
+                            >
+                                <Send size={14} /> Đã Gửi
+                            </button>
+                            <button
+                                onClick={() => { setActiveTab('received'); setSelectedYear('all') }}
+                                className={`flex-1 flex items-center justify-center gap-2 px-4 py-1.5 rounded-md text-sm font-bold transition ${activeTab === 'received' ? 'bg-green-600 shadow' : 'text-white/50 hover:text-white'}`}
+                            >
+                                <Inbox size={14} /> Đã Nhận
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Loading */}
@@ -60,13 +128,25 @@ export default function MyGiftsPage() {
                 )}
 
                 {/* Empty State */}
-                {!loading && gifts.length === 0 && (
+                {!loading && filteredGifts.length === 0 && (
                     <div className="text-center py-20 bg-white/5 rounded-2xl border-2 border-dashed border-white/20">
-                        <Gift className="w-16 h-16 mx-auto mb-4 text-white/50" />
-                        <p className="text-xl mb-6">Bạn chưa gửi món quà nào cả!</p>
-                        <Link href="/create" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full font-bold transition shadow-lg">
-                            Gửi món quà đầu tiên ngay
-                        </Link>
+                        {activeTab === 'sent' ? (
+                            /* --- NỘI DUNG KHI TAB GỬI TRỐNG --- */
+                            <>
+                                <Gift className="w-16 h-16 mx-auto mb-4 text-white/50" />
+                                <p className="text-xl mb-6">Bạn chưa gửi món quà nào trong khoảng thời gian này!</p>
+                                <Link href="/create" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full font-bold transition shadow-lg">
+                                    Gửi món quà đầu tiên ngay
+                                </Link>
+                            </>
+                        ) : (
+                            /* --- NỘI DUNG KHI TAB NHẬN TRỐNG --- */
+                            <>
+                                <Inbox className="w-16 h-16 mx-auto mb-4 text-white/50" />
+                                <p className="text-xl mb-2">Chưa có ai gửi quà cho bạn cả</p>
+                                <p className="text-sm opacity-60">Hãy rủ bạn bè tham gia để nhận quà nhé!</p>
+                            </>
+                        )}
                     </div>
                 )}
 
