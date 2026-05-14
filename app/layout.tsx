@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { Inter, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import MusicPlayer from "@/components/MusicPlayer";
-import WelcomeScreen from "@/components/WelcomeScreen";
 import SnowfallBackground from "@/components/SnowfallBackground";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const inter = Inter({ subsets: ["latin"] });
 
-const dancingScript = Dancing_Script({ 
+const dancingScript = Dancing_Script({
   subsets: ['latin'],
   weight: ['400', '700'],
   variable: '--font-dancing'
@@ -23,13 +23,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+
   return (
     <html lang="en">
       <body className={`${inter.className} ${dancingScript.variable}`}>
-        <SnowfallBackground />   
-        <WelcomeScreen />
-        {children}
-        <MusicPlayer />
+        <GoogleOAuthProvider clientId={googleClientId}>
+          <SnowfallBackground />
+          {children}
+          <MusicPlayer />
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

@@ -1,15 +1,41 @@
-import { type NextRequest } from 'next/server'
-import { updateSession } from '@/utils/supabase/middleware'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export async function middleware(request: NextRequest) {
-  // Gọi hàm xử lý session chúng ta vừa viết
-  return await updateSession(request)
+export function middleware(request: NextRequest) {
+  const token = request.cookies.get('access_token')?.value;
+  const { pathname } = request.nextUrl;
+
+  const isAuthRoute =
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/forgot-password') ||
+    pathname.startsWith('/reset-password');
+
+  const isProtectedRoute =
+    pathname.startsWith('/create') ||
+    pathname.startsWith('/my-gifts') ||
+    pathname.startsWith('/profile');
+
+  if (isAuthRoute && token) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  if (isProtectedRoute && !token) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
-  // Cấu hình matcher để middleware chạy trên hầu hết các route,
-  // trừ các file tĩnh, ảnh, favicon... để tối ưu hiệu năng.
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/',
+    '/login',
+    '/forgot-password',
+    '/reset-password',
+    '/auth/verify',
+    '/create',
+    '/my-gifts',
+    '/profile',
+    '/gifts/:path*'
   ],
-}
+};
