@@ -1,5 +1,5 @@
 {
-  "name": "christmas-frontend",
+  "name": "christmas-wishes-web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,27 +9,33 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.89.0",
+    "@react-oauth/google": "^0.13.5",
+    "axios": "^1.16.0",
     "canvas-confetti": "^1.9.4",
-    "emoji-picker-react": "^4.16.1",
+    "emoji-picker-react": "^4.19.1",
     "framer-motion": "^12.23.26",
+    "js-cookie": "^3.0.5",
     "lucide-react": "^0.562.0",
-    "next": "16.1.1",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "next": "^16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "react-snowfall": "^2.4.0",
     "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/canvas-confetti": "^1.9.0",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "postcss": "^8.5.14",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "postcss": "^8.5.14"
   }
 }
